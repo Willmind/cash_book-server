@@ -8,10 +8,67 @@ const defaultAvatar = 'http://s.yezgea02.com/1615973940679/WeChat77d6d2ac093e247
 
 
 class UserController extends Controller {
+    // 修改用户信息
+    async editUserInfo() {
+        const { ctx, app } = this;
+        // 通过 post 请求，在请求体中获取签名字段 signature
+        const { signature = '' } = ctx.request.body
+
+        try {
+            let user_id
+            const token = ctx.request.header.authorization;
+            // 解密 token 中的用户名称
+            const decode = await app.jwt.verify(token, app.config.jwt.secret);
+            if (!decode) return
+            user_id = decode.id
+            // 通过 username 查找 userInfo 完整信息
+            const userInfo = await ctx.service.user.getUserByName(decode.username)
+            // 通过 service 方法 editUserInfo 修改 signature 信息。
+            const result = await ctx.service.user.editUserInfo({
+                ...userInfo,
+                signature
+            });
+
+            ctx.body = {
+                code: 200,
+                msg: '请求成功',
+                data: {
+                    id: user_id,
+                    signature,
+                    username: userInfo.username
+                }
+            }
+        } catch (error) {
+
+        }
+
+
+    }
+
+    // 获取用户信息
+    async getUserInfo() {
+        const {ctx, app} = this;
+        const token = ctx.request.header.authorization;
+        // 通过 app.jwt.verify 方法，解析出 token 内的用户信息
+        const decode = await app.jwt.verify(token, app.config.jwt.secret);
+        // 通过 getUserByName 方法，以用户名 decode.username 为参数，从数据库获取到该用户名下的相关信息
+        const userInfo = await ctx.service.user.getUserByName(decode.username)
+        // userInfo 中应该有密码信息，所以我们指定下面四项返回给客户端
+        ctx.body = {
+            code: 200,
+            msg: '请求成功',
+            data: {
+                id: userInfo.id,
+                username: userInfo.username,
+                signature: userInfo.signature || '',
+                avatar: userInfo.avatar || defaultAvatar
+            }
+        }
+    }
 
     // 验证方法
     async test() {
-        const { ctx, app } = this;
+        const {ctx, app} = this;
         // 通过 token 解析，拿到 user_id
         const token = ctx.request.header.authorization; // 请求头获取 authorization 属性，值为 token
         // 通过 app.jwt.verify + 加密字符串 解析出 token 的值
@@ -26,10 +83,10 @@ class UserController extends Controller {
         }
     }
 
-    async login(){
+    async login() {
         // app 为全局属性，相当于所有的插件方法都植入到了 app 对象。
-        const { ctx, app } = this;
-        const { username, password } = ctx.request.body
+        const {ctx, app} = this;
+        const {username, password} = ctx.request.body
 
         // 根据用户名，在数据库查找相对应的id操作
         const userInfo = await ctx.service.user.getUserByName(username)
@@ -69,12 +126,11 @@ class UserController extends Controller {
         };
 
 
-
     }
 
     async register() {
-        const { ctx } = this;
-        const { username, password } = ctx.request.body; // 获取注册需要的参数
+        const {ctx} = this;
+        const {username, password} = ctx.request.body; // 获取注册需要的参数
 
         // 判空操作
         if (!username || !password) {
@@ -105,7 +161,7 @@ class UserController extends Controller {
             username,
             password,
             signature: '世界和平。',
-            ctime:moment().format('YYYY-MM-DD hh:mm:ss'),
+            ctime: moment().format('YYYY-MM-DD hh:mm:ss'),
             avatar: defaultAvatar
         });
 

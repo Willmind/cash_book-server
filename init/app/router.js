@@ -12,5 +12,8 @@ module.exports = app => {
   router.post('/api/user/register', controller.user.register);//注册
   router.post('/api/user/login', controller.user.login); //登陆
   router.get('/api/user/test', _jwt,controller.user.test);
-  // router.get('/user', controller.home.user);
+
+  router.get('/api/user/get_userinfo', _jwt, controller.user.getUserInfo); // 获取用户信息
+  router.post('/api/user/edit_userinfo', _jwt, controller.user.editUserInfo); // 修改用户个性签名
+
 };
