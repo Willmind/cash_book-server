@@ -11,7 +11,7 @@ class HomeService extends Service {
             const result = await app.mysql.query(sql); // mysql 实例已经挂载到 app 对象下，可以通过 app.mysql 获取到。
             return result;
         } catch (error) {
-            console.log(error);
+
             return null;
         }
     }
