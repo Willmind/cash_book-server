@@ -71,20 +71,21 @@ class BillController extends Controller {
             user_id = decode.id
 
 
-
             const list = await ctx.service.bill.list(user_id)
             // 过滤出月份和类型所对应的账单列表
             const _list = list.filter(item => {
                 if (type_id !== 'all') {
-                    return moment(Number(item.date)).format('YYYY-MM') === date && type_id === item.type_id
+
+                    return moment(Number(item.date) ).format('YYYY-MM') === date && type_id == item.type_id
                 }
-                return moment(Number(item.date) * 1000).format('YYYY-MM') === date
+                return moment(Number(item.date) ).format('YYYY-MM') === date
             })
+
 
             let listMap = _list.reduce((curr, item) => {
                 // curr 默认初始值是一个空数组 []
                 // 把第一个账单项的时间格式化为 YYYY-MM-DD
-                const date = moment(Number(item.date) * 1000).format('YYYY-MM-DD')
+                const date = moment(Number(item.date) ).format('YYYY-MM-DD')
                 // 如果能在累加的数组中找到当前项日期 date，那么在数组中的加入当前项到 bills 数组。
                 if (curr && curr.length && curr.findIndex(item => item.date === date) > -1) {
                     const index = curr.findIndex(item => item.date === date)
@@ -117,7 +118,7 @@ class BillController extends Controller {
              * @private
              */
                 // 首先获取当月所有账单列表
-            let __list = list.filter(item => moment(Number(item.date) * 1000).format('YYYY-MM') === date)
+            let __list = list.filter(item => moment(Number(item.date) ).format('YYYY-MM') === date)
 
 
             // 累加计算支出
@@ -166,10 +167,10 @@ class BillController extends Controller {
      * 获取账单详情
      * @returns {Promise<void>}
      */
-    async detail(){
-        const { ctx, app } = this;
+    async detail() {
+        const {ctx, app} = this;
         // 获取账单 id 参数
-        const { id = '' } = ctx.query
+        const {id = ''} = ctx.query
 
         // 获取用户 user_id
         let user_id
@@ -198,7 +199,7 @@ class BillController extends Controller {
                 data: detail
             }
 
-        }catch (error){
+        } catch (error) {
             ctx.body = {
                 code: 500,
                 msg: '系统错误',
@@ -212,10 +213,10 @@ class BillController extends Controller {
      * 编辑账单
      * @returns {Promise<void>}
      */
-    async update(){
-        const { ctx, app } = this;
+    async update() {
+        const {ctx, app} = this;
         // 账单的相关参数，这里注意要把账单的 id 也传进来
-        const { id, amount, type_id, type_name, date, pay_type, remark = '' } = ctx.request.body;
+        const {id, amount, type_id, type_name, date, pay_type, remark = ''} = ctx.request.body;
         // 判空处理
         if (!amount || !type_id || !type_name || !date || !pay_type) {
             ctx.body = {
@@ -248,7 +249,7 @@ class BillController extends Controller {
                 data: null
             }
 
-        }catch (error){
+        } catch (error) {
             ctx.body = {
                 code: 500,
                 msg: '系统错误',
@@ -259,8 +260,8 @@ class BillController extends Controller {
     }
 
     async delete() {
-        const { ctx, app } = this;
-        const { id } = ctx.request.body;
+        const {ctx, app} = this;
+        const {id} = ctx.request.body;
 
         if (!id) {
             ctx.body = {
@@ -291,9 +292,9 @@ class BillController extends Controller {
         }
     }
 
-    async data(){
-        const { ctx, app } = this;
-        const { date = '' } = ctx.query
+    async data() {
+        const {ctx, app} = this;
+        const {date = ''} = ctx.query
 
         // 获取用户 user_id
         let user_id
@@ -305,9 +306,10 @@ class BillController extends Controller {
         try {
             // 获取账单表中的账单数据
             const result = await ctx.service.bill.list(user_id);
+
             // 根据时间参数，筛选出当月所有的账单数据
-            const start = moment(date).startOf('month').unix(); // 选择月份，月初时间
-            const end = moment(date).endOf('month').unix(); // 选择月份，月末时间
+            const start = moment(date).startOf('month').unix()*1000; // 选择月份，月初时间
+            const end = moment(date).endOf('month').unix()*1000; // 选择月份，月末时间
             /**
              * _data 便是我们经过筛选过滤出来的当月账单基础数据，每一条数据都是之前用户手动添加的，所以会有很多同类项。
              * @private
@@ -325,10 +327,13 @@ class BillController extends Controller {
             // 总收入
             const total_income = _data.reduce((arr, cur) => {
                 if (cur.pay_type === 2) {
+
                     arr += Number(cur.amount)
                 }
                 return arr
             }, 0)
+
+            console.log(total_income);
 
             // 获取收支构成
             /**
@@ -347,7 +352,7 @@ class BillController extends Controller {
                         number: Number(cur.amount)
                     })
                 }
-        //如果找到相同的消费类型，index 值则为大于 -1 的值，所以我们找到 arr[index]，让它的 number 属性加上当前项的 amount，以此实现相同消费类型的累加。
+                //如果找到相同的消费类型，index 值则为大于 -1 的值，所以我们找到 arr[index]，让它的 number 属性加上当前项的 amount，以此实现相同消费类型的累加。
                 if (index > -1) {
                     arr[index].number += Number(cur.amount)
                 }
@@ -370,13 +375,11 @@ class BillController extends Controller {
             }
 
 
-
         } catch {
 
         }
 
     }
-
 
 
 }
