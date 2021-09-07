@@ -10,7 +10,7 @@
 cd init
 
 # 安装依赖
-npm install
+cnpm install
 
 # 项目运行(开启项目前请确保MySQL数据库已开启)
 npm run dev
