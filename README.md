@@ -8,8 +8,10 @@
 ```
 //进入项目文件夹
 cd init
+
 //安装依赖
 npm install
+
 //项目运行(开启项目前请确保MySQL数据库已开启)
 npm run dev
 ```
