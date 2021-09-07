@@ -24,5 +24,6 @@ module.exports = app => {
 
   router.get('/api/bill/data', _jwt, controller.bill.data); // 获取数据
   router.post('/api/upload', _jwt, controller.upload.upload); // 上传图片
+  router.post('/api/user/modify_pass', _jwt, controller.user.modifyPass); // 修改密码
 
 };
